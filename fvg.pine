@@ -1,0 +1,40 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © sonnyparlin
+
+//@version=5
+indicator("Fair Value Gap Finder", overlay=true)
+useVolume = input.bool(true, "Use Volume to determine FVGs")
+volumeThreshold = input.int(2, "Volume must be X times the average", step=1)
+volumeAverageLength = input.int(20, "Volume moving average", step=10)
+gapLength = input.int(60, "Gap Length", step=10)
+emaLength = input.int(20, "EMA Length", step=1)
+minGapSize = input.float(0.25, "Minimum gap size to show", step=0.01)
+volumeCondition = volume[1] > ta.sma(volume[1], volumeAverageLength) * volumeThreshold
+
+bullishFVGCOlor = input.color(color.new(color.green, 70))
+bearishFVGCOlor = input.color(color.new(color.red, 70))
+bullFVGText = input.string("Bullish Fair Value Gap")
+bearFVGText = input.string ("Bearish Fair Value Gap")
+textColor = input.color(color.new(color.black, 10))
+sizeOption = input.string(title="Label Size", options = ["Auto", "Huge", "Large", "Normal", "Small", "Tiny"], defval="Small")
+labelSize = (sizeOption == "Huge") ? size.huge : (sizeOption == "Large") ? size.large : (sizeOption == "Small") ? size.small : (sizeOption == "Tiny") ? size.tiny : (sizeOption == "Auto") ? size.auto : size.normal
+
+ema = ta.ema(close, emaLength)
+
+var buyVolume = 0.0
+var sellVolume = 0.0
+buyVolume := (high[1]==low[1]) ? 0 : volume[1] * (close[1]-low[1]) / (high[1]-low[1])
+sellVolume := (high[1]==low[1]) ? 0 : volume[1] * (high[1]-close[1]) / (high[1]-low[1])
+
+if (useVolume)
+    if volumeCondition and buyVolume > sellVolume and high[2] < low and low - high[2] > minGapSize and close[1] > ema
+        box.new(bar_index, high[2], bar_index + gapLength, low, border_color = color.new(color.black, 100), bgcolor=bullishFVGCOlor, text=bullFVGText, text_color = textColor, text_size = labelSize, text_halign = text.align_right)
+
+    if volumeCondition and sellVolume > buyVolume and low[2] > high and low[2] - high > minGapSize and close[1] < ema
+        box.new(bar_index, low[2], bar_index + gapLength, high, border_color = color.new(color.black, 100), bgcolor=bearishFVGCOlor, text=bearFVGText, text_color = textColor, text_size = labelSize, text_halign = text.align_right)
+else
+    if buyVolume > sellVolume and high[2] < low and low - high[2] > minGapSize and close[1] > ema
+        box.new(bar_index, high[2], bar_index + gapLength, low, border_color = color.new(color.black, 100), bgcolor=bullishFVGCOlor, text=bullFVGText, text_color = textColor, text_size = labelSize, text_halign = text.align_right)
+
+    if sellVolume > buyVolume and low[2] > high and low[2] - high > minGapSize and close[1] < ema
+        box.new(bar_index, low[2], bar_index + gapLength, high, border_color = color.new(color.black, 100), bgcolor=bearishFVGCOlor, text=bearFVGText, text_color = textColor, text_size = labelSize, text_halign = text.align_right)
