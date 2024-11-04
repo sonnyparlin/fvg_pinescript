@@ -24,7 +24,7 @@ sellFVGColor = input.color(color.new(color.red, 70), group='Styles')
 buyFVGColor = input.color(color.new(color.green, 70), group='Styles')
 buyFVGText = input.string("Buyers Fair Value Gap", group='Styles')
 sellFVGText = input.string("Sellers Fair Value Gap", group='Styles')
-textColor = input.color(color.new(color.white, 10), group='Styles')
+textColor = input.color(color.new(color.gray, 10), group='Styles')
 sizeOption = input.string(title="Label Size",
      options=["Auto", "Huge", "Large", "Normal", "Small", "Tiny"],
      defval="Small", group='Styles')
